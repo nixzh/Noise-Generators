@@ -1,0 +1,79 @@
+#include <opencv2/opencv.hpp>
+#include <iostream>
+#include <string>
+#include <math.h>
+#include <time.h>
+
+using namespace cv;
+using namespace std;
+
+int main()
+{
+	char k[100];
+	cout << "the path of image：" << endl;
+	cin.getline(k, 100);
+	Mat img = imread(k, 0);
+	if (img.empty())
+	{
+		cout << "error!" << endl;
+		return -1;
+	}//读取图片
+	cout << "the kind of noise(1 for salt&pepper,2 for gauss):" << endl;
+	int flag;
+	cin >> flag;
+	if (flag == 1)
+	{
+		float a, b;
+		cout << "the percrnt of salt:" << endl;
+		cin >> a;
+		cout << "the percent of pepper:" << endl;
+		cin >> b;
+		if (a > 1 || b > 1 || a + b > 1 || a<0 || b<0)
+		{
+			cout << "error!" << endl;
+			return -1;
+		}
+
+		int noa = img.rows*img.cols*a;	//定义椒盐点出现概率
+		int nob = img.rows*img.cols*b;
+		for (int i = 0; i < noa; i++)
+		{
+
+			RNG rng;
+			int c = rand() % (img.rows);
+			int d = rand() % (img.cols);
+			img.at<uchar>(c, d) = 0;
+		}
+
+		for (int j = 0; j < nob; j++)
+		{
+
+			RNG rng;
+			int e = rand() % (img.rows);
+			int f = rand() % (img.cols);
+			img.at<uchar>(e, f) = 255;
+		}
+		imwrite("F://salt&pepper.tif", img);
+		imshow("image", img);
+	}
+	else if (flag == 2)
+	{
+		float u, v;
+		cout << "the mean:" << endl;
+		cin >> u;
+		cout << "the variance:" << endl;
+		cin >> v;
+		Mat img1 = img.clone();
+		RNG rng;
+		randn(img1, u, v);
+		add(img1, img, img);
+		imwrite("F://gaussnoise.tif", img);
+		imshow("image", img);
+	}
+	else
+	{
+		return -1;
+	}
+	waitKey();
+	return 0;
+}
